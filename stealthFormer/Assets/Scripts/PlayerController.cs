@@ -5,13 +5,16 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     private LevelManager theLevelManager;
+    public Vector3 respawnPosition; // position where player respawns
 
     //Moving the player
     public Rigidbody2D myRigidBody;
     public float moveSpeed;
 
     public KeyCode left;
+    public KeyCode leftAlt; // left arrow key
     public KeyCode right;
+    public KeyCode rightAlt; // right arrow key
 
     //Jump checking
     public KeyCode jump;
@@ -44,6 +47,7 @@ public class PlayerController : MonoBehaviour
         myAnimator = GetComponent<Animator>();
         theLevelManager = FindObjectOfType<LevelManager>();
         doublejump = false;
+        respawnPosition = transform.position; // used for respawn without hitting checkpoint
 
     }
 
@@ -56,12 +60,12 @@ public class PlayerController : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckradius, WhatIsGround);
 
         //Moving the Player
-        if (Input.GetKey(right))
+        if (Input.GetKey(right) || Input.GetKey(rightAlt))
         {
             myRigidBody.velocity = new Vector3(moveSpeed, myRigidBody.velocity.y, 0f);
             transform.localScale = new Vector3(1f, 1f, 1f);
         }
-        else if (Input.GetKey(left))
+        else if (Input.GetKey(left) || Input.GetKey(leftAlt))
         {
             myRigidBody.velocity = new Vector3(-moveSpeed, myRigidBody.velocity.y, 0f);
             transform.localScale = new Vector3(-1f, 1f, 1f);
@@ -87,12 +91,12 @@ public class PlayerController : MonoBehaviour
                     doublejump = false;
                 }
             }
-            
+
         }
         // doublejump is only true if you are already off the ground
-        
-           
-        
+
+
+
 
         /*//Throwing Snowball
         if (Input.GetKeyDown(throwSnowBall) && snowBallcounter <= 0)
@@ -112,9 +116,15 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if ((other.gameObject.tag == "Enemy")||(other.gameObject.tag == "leftwallkillzone") || (other.gameObject.tag == "rightwallkillzone") || (other.gameObject.tag == "ceilingkillzone") || (other.gameObject.tag == "floorkillzone"))
+        if ((other.gameObject.tag == "Enemy") || (other.gameObject.tag == "leftwallkillzone") || (other.gameObject.tag == "rightwallkillzone") || (other.gameObject.tag == "ceilingkillzone") || (other.gameObject.tag == "floorkillzone"))
         {
             theLevelManager.GameOver();
+        }
+        // handle respawn
+        if (other.tag == "KillZone")
+        {
+            //gameObject.SetActive (false);
+            theLevelManager.Respawn();//respawn player
         }
     }
     private void OnCollisionEnter2D(Collision2D collision)
