@@ -127,11 +127,28 @@ public class PlayerController : MonoBehaviour
             theLevelManager.Respawn();//respawn player
         }
     }
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        if (collision.gameObject.tag == "Enemy")
+        if (other.gameObject.tag == "Enemy")
         {
             theLevelManager.GameOver();
+        }
+
+        //handle player on moving platforms, so it doesn't slide off
+        if (other.gameObject.tag == "MovingPlatform")
+        {
+            //make player's parent the platform to move player at same speed
+            transform.parent = other.transform;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D other)
+    {
+        //handle player on moving platforms, so it doesn't slide off
+        if (other.gameObject.tag == "MovingPlatform")
+        {
+            //mremove parent so player can move freely
+            transform.parent = null;
         }
     }
 
