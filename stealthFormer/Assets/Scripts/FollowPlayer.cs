@@ -1,29 +1,48 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using System.Collections;
 
-public class FollowPlayer : MonoBehaviour {
+public class FollowPlayer : MonoBehaviour
+{
 
-    public GameObject player;       // REMEMBER TO SET IN INSPECTOR
-    public GameObject topRight;
-    public GameObject bottomLeft;
+    /*
+	* Used to keep the camera following the player during gameplay
+	*/
 
-    private float minY;
-    private float minX;
-    private float maxY;
-    private float maxX;
+    public GameObject target; // target that the camera is following
+    public float followAhead; // amount ahead of player the camera is so player isn't is dead center
 
-    private void Start()
+    private Vector3 targetPosition;
+
+    public float smoothing;
+
+
+    // Use this for initialization
+    void Start()
     {
-        minY = bottomLeft.transform.position.y;
-        minX = bottomLeft.transform.position.x;
-        maxY = topRight.transform.position.y;
-        maxX = topRight.transform.position.x;
+
     }
 
-    private void LateUpdate()
+    // Update is called once per frame
+    void Update()
     {
-        transform.position = new Vector3(player.transform.position.x, player.transform.position.y, -10);
-        transform.position = new Vector3(Mathf.Clamp(transform.position.x, minX, maxX), Mathf.Clamp(transform.position.y, minY, maxY), -10);
+        // take player's X position but keep camera's Y and Z position so the killzone still works
+        targetPosition = new Vector3(target.transform.position.x, transform.position.y, transform.position.z);
+
+        if (target.transform.localScale.x > 0f)
+        { // facing right for camera ahead of player
+            targetPosition = new Vector3(targetPosition.x + followAhead, targetPosition.y, targetPosition.z);
+        }
+        else
+        { // facing left for lag behind player
+            targetPosition = new Vector3(targetPosition.x - followAhead, targetPosition.y, targetPosition.z);
+
+        }
+
+        // transform.position = targetPosition;
+
+        // keeps the camera from a violent flip when character goes from left to right 
+        // and the smoothing helps to make it seamless and smooth
+        transform.position = Vector3.Lerp(transform.position, targetPosition, smoothing * Time.deltaTime);
+
     }
 }
